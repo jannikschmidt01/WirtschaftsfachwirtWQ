@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>WiFaWi WQ 2026</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+html,body{height:100%;background:#0b0c10;color:#eaebf2;font-family:system-ui,sans-serif;font-size:14px;display:flex;flex-direction:column;overflow:hidden;}
+:root{--bg:#0b0c10;--su:#121318;--ca:#181920;--br:#22232e;--tx:#eaebf2;--mu:#52536a;--gl:#f0c030;--gr:#34c068;--re:#f05848;--yl:#f0a030;}
+nav{background:var(--su);border-bottom:1px solid var(--br);flex-shrink:0;}
+.nt{display:flex;align-items:center;justify-content:space-between;padding:11px 16px;}
+.logo{font-weight:800;font-size:18px;color:var(--gl);}
+.streak{background:rgba(255,140,0,.15);border:1px solid rgba(255,140,0,.3);border-radius:8px;padding:5px 10px;font-size:12px;font-weight:700;color:#ff8c00;}
+.tabs{display:flex;border-top:1px solid var(--br);overflow-x:auto;scrollbar-width:none;}
+.tabs::-webkit-scrollbar{display:none;}
+.tab{flex-shrink:0;padding:9px 12px;font-size:12px;font-weight:500;color:var(--mu);cursor:pointer;border:none;border-bottom:2px solid transparent;background:none;font-family:inherit;white-space:nowrap;}
+.tab.on{color:var(--gl);border-bottom-color:var(--gl);}
+.pages{flex:1;overflow:hidden;position:relative;}
+.pg{position:absolute;inset:0;overflow-y:auto;padding:14px 13px 80px;display:none;}
+.pg.on{display:block;}
+.w{max-width:700px;margin:0 auto;}
+.card{background:var(--ca);border:1px solid var(--br);border-radius:11px;padding:14px;margin-bottom:10px;}
+input,select,textarea{font-family:inherit;color:var(--tx);background:var(--su);border:1px solid var(--br);border-radius:8px;padding:9px 11px;font-size:14px;width:100%;}
+input:focus,select:focus,textarea:focus{outline:none;border-color:var(--gl);}
+select option{background:#121318;}
+label{font-size:12px;color:var(--mu);display:block;margin-bottom:4px;margin-top:10px;}
+label:first-child{margin-top:0;}
+.tag{display:inline-flex;padding:3px 8px;border-radius:5px;font-size:11px;font-weight:700;}
+.bar-wrap{height:8px;background:var(--su);border-radius:99px;overflow:hidden;margin-top:4px;}
+.bar{height:100%;border-radius:99px;}
+.schwach-chip{display:inline-flex;align-items:center;gap:4px;padding:4px 8px;border-radius:6px;font-size:11px;background:rgba(240,88,72,.15);border:1px solid rgba(240,88,72,.3);color:var(--re);margin:3px;}
+.arch-row{display:flex;align-items:center;gap:8px;padding:9px 0;border-bottom:1px solid var(--br);}
+.arch-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;}
+</style>
+</head>
+<body>
+<nav>
+  <div class="nt">
+    <div class="logo">WiFaWi WQ 2026</div>
+    <div class="streak" id="streak-pill" style="display:none">🔥 0 Tage</div>
+  </div>
+  <div class="tabs">
+    <button class="tab on" onclick="go('eintragen',this)">Eintragen</button>
+    <button class="tab" onclick="go('verlauf',this)">Verlauf</button>
+    <button class="tab" onclick="go('archiv',this)">Archiv</button>
+    <button class="tab" onclick="go('statistik',this)">Statistik</button>
+    <button class="tab" onclick="go('simulation',this)">Simulation</button>
+    <button class="tab" onclick="go('export',this)">Export</button>
+  </div>
+</nav>
+<div class="pages">
+
+<!-- EINTRAGEN -->
+<div class="pg on" id="pg-eintragen"><div class="w">
+  <div class="card">
+    <div style="font-weight:700;font-size:16px;margin-bottom:14px;color:var(--gl)">Prüfung eintragen</div>
+    <label>Datum</label>
+    <input type="date" id="e-datum">
+    <label>Fach</label>
+    <select id="e-fach">
+      <option value="rw">Rechnungswesen</option>
+      <option value="uf">Unternehmensführung</option>
+      <option value="vw">VWL &amp; BWL</option>
+      <option value="rs">Recht &amp; Steuer</option>
+    </select>
+    <label>Prüfungsjahr / Bezeichnung</label>
+    <input type="text" id="e-jahr" placeholder="z.B. 2023 Herbst, IHK 2022...">
+    <label>Erreichte Punkte (von 100)</label>
+    <input type="number" id="e-punkte" min="0" max="100" placeholder="z.B. 58">
+    <label>Schwierige Themen (kommagetrennt)</label>
+    <input type="text" id="e-schwach" placeholder="z.B. BAB, Kalkulation, BGB AT">
+    <label>Notizen</label>
+    <textarea id="e-notiz" rows="3" placeholder="Was war unklar? Was muss ich nochmal anschauen?"></textarea>
+    <button onclick="saveEntry()" style="width:100%;margin-top:14px;padding:13px;background:var(--gl);color:#000;border-radius:10px;font-weight:700;font-size:15px;cursor:pointer;border:none;">Speichern</button>
+  </div>
+  <div class="card" style="background:rgba(240,192,48,.07);border-color:rgba(240,192,48,.2)">
+    <div style="font-size:12px;color:var(--gl);font-weight:700;margin-bottom:8px">So gehst du vor</div>
+    <div style="font-size:13px;line-height:1.8;color:var(--mu)">1. Alte IHK-Prüfung aufschlagen<br>2. Fach komplett durcharbeiten<br>3. Nicht gewusst? 10 Min Buch lesen, nochmal<br>4. Punkte schätzen / nachrechnen<br>5. Hier eintragen inkl. schwieriger Themen</div>
+  </div>
+</div></div>
+
+<!-- VERLAUF -->
+<div class="pg" id="pg-verlauf"><div class="w">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+    <div style="font-weight:700;font-size:15px">Alle Einträge</div>
+    <select id="v-filter" onchange="renderVerlauf()" style="width:auto;padding:5px 8px;font-size:12px">
+      <option value="all">Alle Fächer</option>
+      <option value="rw">Rechnungswesen</option>
+      <option value="uf">Unternehmensführung</option>
+      <option value="vw">VWL</option>
+      <option value="rs">Recht</option>
+    </select>
+  </div>
+  <div id="verlauf-list"></div>
+</div></div>
+
+<!-- ARCHIV -->
+<div class="pg" id="pg-archiv"><div class="w">
+  <div style="font-weight:700;font-size:15px;margin-bottom:4px">Prüfungsarchiv</div>
+  <div style="font-size:12px;color:var(--mu);margin-bottom:14px">Welche Jahrgänge hast du schon gemacht?</div>
+  <div class="card" style="margin-bottom:12px">
+    <div style="font-weight:700;font-size:13px;margin-bottom:10px;color:var(--gl)">Jahrgang hinzufügen</div>
+    <label>Fach</label>
+    <select id="a-fach">
+      <option value="rw">Rechnungswesen</option>
+      <option value="uf">Unternehmensführung</option>
+      <option value="vw">VWL &amp; BWL</option>
+      <option value="rs">Recht &amp; Steuer</option>
+    </select>
+    <label>Prüfungsjahrgang</label>
+    <input type="text" id="a-jahr" placeholder="z.B. 2023 Herbst, IHK 2022 Frühjahr">
+    <label>Status</label>
+    <select id="a-status">
+      <option value="done">Erledigt</option>
+      <option value="partial">Teilweise gemacht</option>
+      <option value="todo">Noch nicht gemacht</option>
+    </select>
+    <button onclick="saveArchiv()" style="width:100%;margin-top:12px;padding:11px;background:var(--gr);color:#000;border-radius:9px;font-weight:700;font-size:14px;cursor:pointer;border:none;">Hinzufügen</button>
+  </div>
+  <div id="archiv-list"></div>
+</div></div>
+
+<!-- STATISTIK -->
+<div class="pg" id="pg-statistik"><div class="w" id="statistik-c"></div></div>
+
+<!-- SIMULATION -->
+<div class="pg" id="pg-simulation"><div class="w">
+  <div style="font-weight:700;font-size:15px;margin-bottom:12px">Sonntags-Simulation</div>
+  <div class="card" style="margin-bottom:12px">
+    <div style="font-size:13px;color:var(--mu);margin-bottom:12px">Komplette Klausur – alle 4 Fächer, Timer stellen!</div>
+    <label>Datum</label>
+    <input type="date" id="s-datum">
+    <label>Prüfungsjahr</label>
+    <input type="text" id="s-jahr" placeholder="z.B. IHK 2022 komplett">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px">
+      <div><label>RW Punkte</label><input type="number" id="s-rw" min="0" max="100" placeholder="0-100"></div>
+      <div><label>UF Punkte</label><input type="number" id="s-uf" min="0" max="100" placeholder="0-100"></div>
+      <div><label>VWL Punkte</label><input type="number" id="s-vw" min="0" max="100" placeholder="0-100"></div>
+      <div><label>Recht Punkte</label><input type="number" id="s-rs" min="0" max="100" placeholder="0-100"></div>
+    </div>
+    <label>Schwierige Themen</label>
+    <input type="text" id="s-schwach" placeholder="z.B. BAB, BGB AT, Entgeltformen">
+    <label>Notizen</label>
+    <textarea id="s-notiz" rows="2" placeholder="Was war gut? Was war schlecht?"></textarea>
+    <button onclick="saveSim()" style="width:100%;margin-top:12px;padding:12px;background:var(--gl);color:#000;border-radius:9px;font-weight:700;font-size:14px;cursor:pointer;border:none;">Simulation speichern</button>
+  </div>
+  <div id="sim-list"></div>
+</div></div>
+
+<!-- EXPORT -->
+<div class="pg" id="pg-export"><div class="w">
+  <div class="card" style="margin-bottom:10px">
+    <div style="font-size:13px;margin-bottom:12px;color:var(--mu)">Alle Daten als JSON-Backup speichern und importieren.</div>
+    <button onclick="exportD()" style="width:100%;padding:11px;background:var(--gl);color:#000;border-radius:8px;font-weight:700;cursor:pointer;border:none;margin-bottom:8px">Exportieren</button>
+    <button onclick="document.getElementById('imp-f').click()" style="width:100%;padding:11px;background:var(--ca);border:1px solid var(--br);border-radius:8px;font-weight:700;color:var(--tx);cursor:pointer">Importieren</button>
+    <input type="file" id="imp-f" accept=".json" style="display:none" onchange="importD(event)">
+  </div>
+  <div class="card">
+    <div style="font-size:13px;color:var(--mu);margin-bottom:10px">Setzt alle Daten zurück!</div>
+    <button onclick="resetD()" style="width:100%;padding:11px;background:var(--ca);border:1px solid var(--re);border-radius:8px;font-weight:700;color:var(--re);cursor:pointer">Zurücksetzen</button>
+  </div>
+</div></div>
+
+</div>
+<script>
+var FC={rw:"#f05848",uf:"#45a8f5",vw:"#34c068",rs:"#a870f0"};
+var FB={rw:"#2e100e",uf:"#0d1c30",vw:"#0f2219",rs:"#1e0d34"};
+var FN={rw:"Rechnungswesen",uf:"Unternehmensführung",vw:"VWL & BWL",rs:"Recht & Steuer"};
+var SC={done:{c:"#34c068",l:"Erledigt"},partial:{c:"#f0a030",l:"Teilweise"},todo:{c:"#52536a",l:"Offen"}};
+var PASS=50;
+
+function lg(k,d){try{var v=localStorage.getItem(k);return v?JSON.parse(v):d;}catch(e){return d;}}
+function ls(k,v){try{localStorage.setItem(k,JSON.stringify(v));}catch(e){alert("Speichern fehlgeschlagen – bitte Daten exportieren!");}}
+
+var entries=lg("wfw_entries",[]);
+var sims=lg("wfw_sims",[]);
+var archiv=lg("wfw_archiv",[]);
+
+function go(id,el){
+  document.querySelectorAll(".pg").forEach(function(p){p.classList.remove("on");});
+  document.querySelectorAll(".tab").forEach(function(t){t.classList.remove("on");});
+  document.getElementById("pg-"+id).classList.add("on");
+  if(el)el.classList.add("on");
+  if(id==="verlauf")renderVerlauf();
+  if(id==="statistik")renderStatistik();
+  if(id==="simulation")renderSims();
+  if(id==="archiv")renderArchiv();
+}
+
+function calcStreak(){
+  if(!entries.length)return 0;
+  var dates=[...new Set(entries.map(function(e){return e.d;}))].sort().reverse();
+  var streak=0;
+  var cur=new Date();
+  cur.setHours(0,0,0,0);
+  for(var i=0;i<90;i++){
+    var ds=cur.toISOString().slice(0,10);
+    if(dates.includes(ds)){streak++;}
+    else if(i===0){/* today ok */}
+    else break;
+    cur.setDate(cur.getDate()-1);
+  }
+  return streak;
+}
+
+function updateStreak(){
+  var s=calcStreak();
+  var el=document.getElementById("streak-pill");
+  if(s>0){el.textContent="🔥 "+s+" Tag"+(s!==1?"e":"");el.style.display="";}
+  else el.style.display="none";
+}
+
+document.getElementById("e-datum").value=new Date().toISOString().slice(0,10);
+document.getElementById("s-datum").value=new Date().toISOString().slice(0,10);
+
+function scoreColor(p){return p>=50?"var(--gr)":p>=35?"var(--yl)":"var(--re)";}
+
+function saveEntry(){
+  var d=document.getElementById("e-datum").value;
+  var f=document.getElementById("e-fach").value;
+  var j=document.getElementById("e-jahr").value.trim();
+  var p=document.getElementById("e-punkte").value;
+  var sw=document.getElementById("e-schwach").value.trim();
+  var n=document.getElementById("e-notiz").value.trim();
+  if(!d||!j||p===""){alert("Bitte Datum, Prüfungsjahr und Punkte eintragen!");return;}
+  var schwach=sw?sw.split(",").map(function(s){return s.trim();}).filter(Boolean):[];
+  entries.push({id:Date.now(),d:d,f:f,j:j,p:parseInt(p),schwach:schwach,n:n});
+  ls("wfw_entries",entries);
+  // Auto-add to archiv if not exists
+  var exists=archiv.some(function(a){return a.f===f&&a.j===j;});
+  if(!exists){
+    archiv.push({id:Date.now()+1,f:f,j:j,status:"done"});
+    ls("wfw_archiv",archiv);
+  }
+  document.getElementById("e-jahr").value="";
+  document.getElementById("e-punkte").value="";
+  document.getElementById("e-schwach").value="";
+  document.getElementById("e-notiz").value="";
+  updateStreak();
+  showToast("Gespeichert! "+FN[f]+" – "+p+" Punkte");
+}
+
+function showToast(msg){
+  var t=document.createElement("div");
+  t.textContent=msg;
+  t.style.cssText="position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:#34c068;color:#000;padding:10px 18px;border-radius:10px;font-weight:700;font-size:13px;z-index:999;white-space:nowrap;box-shadow:0 4px 20px rgba(0,0,0,.4);";
+  document.body.appendChild(t);
+  setTimeout(function(){t.remove();},2500);
+}
+
+function renderVerlauf(){
+  var filter=document.getElementById("v-filter").value;
+  var list=entries.filter(function(e){return filter==="all"||e.f===filter;}).slice().reverse();
+  var c=document.getElementById("verlauf-list");
+  if(!list.length){c.innerHTML='<div class="card" style="text-align:center;color:var(--mu);padding:30px">Noch keine Einträge.<br>Trag deine erste Prüfung ein!</div>';return;}
+  var h="";
+  list.forEach(function(e){
+    var ok=e.p>=PASS;
+    h+='<div class="card" style="margin-bottom:8px">';
+    h+='<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">';
+    h+='<span class="tag" style="background:'+FB[e.f]+';color:'+FC[e.f]+'">'+FN[e.f].split(" ")[0]+'</span>';
+    h+='<div><div style="font-size:13px;font-weight:600">'+e.j+'</div><div style="font-size:11px;color:var(--mu)">'+e.d+'</div></div>';
+    h+='<div style="margin-left:auto;font-size:24px;font-weight:800;color:'+scoreColor(e.p)+'">'+e.p+'</div>';
+    h+='</div>';
+    h+='<div class="bar-wrap"><div class="bar" style="width:'+e.p+'%;background:'+scoreColor(e.p)+'"></div></div>';
+    h+='<div style="display:flex;justify-content:space-between;margin-top:6px">';
+    h+='<div style="font-size:11px;color:'+(ok?"var(--gr)":"var(--re)")+';font-weight:700">'+(ok?"✅ Bestanden":"❌ Nicht bestanden")+'</div>';
+    h+='<div style="font-size:11px;color:var(--mu)">Ziel: 50P</div>';
+    h+='</div>';
+    if(e.schwach&&e.schwach.length){
+      h+='<div style="margin-top:8px">';
+      e.schwach.forEach(function(s){h+='<span class="schwach-chip">'+s+'</span>';});
+      h+='</div>';
+    }
+    if(e.n)h+='<div style="font-size:12px;color:var(--mu);margin-top:8px;line-height:1.5;border-top:1px solid var(--br);padding-top:8px">'+e.n+'</div>';
+    h+='</div>';
+  });
+  c.innerHTML=h;
+}
+
+function saveArchiv(){
+  var f=document.getElementById("a-fach").value;
+  var j=document.getElementById("a-jahr").value.trim();
+  var s=document.getElementById("a-status").value;
+  if(!j){alert("Bitte Prüfungsjahrgang eintragen!");return;}
+  var exists=archiv.some(function(a){return a.f===f&&a.j===j;});
+  if(exists){alert("Dieser Jahrgang ist bereits im Archiv!");return;}
+  archiv.push({id:Date.now(),f:f,j:j,status:s});
+  ls("wfw_archiv",archiv);
+  document.getElementById("a-jahr").value="";
+  renderArchiv();
+  showToast("Archiv aktualisiert!");
+}
+
+function deleteArchiv(id){
+  archiv=archiv.filter(function(a){return a.id!==id;});
+  ls("wfw_archiv",archiv);
+  renderArchiv();
+}
+
+function renderArchiv(){
+  var c=document.getElementById("archiv-list");
+  if(!archiv.length){
+    c.innerHTML='<div class="card" style="text-align:center;color:var(--mu);padding:30px">Noch kein Archiv.<br>Füge oben Jahrgänge hinzu.</div>';
+    return;
+  }
+  var byFach={rw:[],uf:[],vw:[],rs:[]};
+  archiv.forEach(function(a){if(byFach[a.f])byFach[a.f].push(a);});
+  var h="";
+  ["rw","uf","vw","rs"].forEach(function(f){
+    if(!byFach[f].length)return;
+    var done=byFach[f].filter(function(a){return a.status==="done";}).length;
+    h+='<div class="card" style="margin-bottom:10px;border-left:3px solid '+FC[f]+'">';
+    h+='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">';
+    h+='<div style="font-weight:700;color:'+FC[f]+'">'+FN[f]+'</div>';
+    h+='<div style="font-size:12px;color:var(--mu)">'+done+'/'+byFach[f].length+' erledigt</div>';
+    h+='</div>';
+    byFach[f].sort(function(a,b){return b.j.localeCompare(a.j);}).forEach(function(a){
+      var sc=SC[a.status];
+      h+='<div class="arch-row">';
+      h+='<div class="arch-dot" style="background:'+sc.c+'"></div>';
+      h+='<div style="flex:1;font-size:13px">'+a.j+'</div>';
+      h+='<span style="font-size:11px;color:'+sc.c+';font-weight:700">'+sc.l+'</span>';
+      h+='<button onclick="deleteArchiv('+a.id+')" style="background:none;border:none;color:var(--mu);cursor:pointer;font-size:14px;padding:0 4px;">✕</button>';
+      h+='</div>';
+    });
+    h+='</div>';
+  });
+  c.innerHTML=h;
+}
+
+function renderStatistik(){
+  var c=document.getElementById("statistik-c");
+  var daysLeft=Math.max(0,Math.ceil((new Date("2026-10-21")-new Date())/86400000));
+  var streak=calcStreak();
+  var h='';
+
+  // Top stats
+  h+='<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:14px">';
+  h+='<div class="card" style="text-align:center;padding:12px"><div style="font-size:22px;font-weight:800;color:var(--gl)">'+daysLeft+'</div><div style="font-size:10px;color:var(--mu)">Tage noch</div></div>';
+  h+='<div class="card" style="text-align:center;padding:12px"><div style="font-size:22px;font-weight:800;color:#ff8c00">'+streak+'🔥</div><div style="font-size:10px;color:var(--mu)">Streak</div></div>';
+  h+='<div class="card" style="text-align:center;padding:12px"><div style="font-size:22px;font-weight:800;color:var(--gr)">'+entries.length+'</div><div style="font-size:10px;color:var(--mu)">Prüfungen</div></div>';
+  h+='</div>';
+
+  if(!entries.length&&!sims.length){
+    h+='<div class="card" style="text-align:center;color:var(--mu);padding:30px">Noch keine Daten.<br>Trag deine erste Prüfung ein!</div>';
+    c.innerHTML=h;return;
+  }
+
+  // Pro Prüfungsjahrgang (aus sims + einzelne einträge)
+  h+='<div style="font-weight:700;font-size:14px;margin-bottom:10px">Ergebnisse pro Prüfung</div>';
+
+  // Collect by Jahrgang
+  var byJahr={};
+  entries.forEach(function(e){
+    var key=e.j.replace(" [Sim]","");
+    if(!byJahr[key])byJahr[key]={j:key,faecher:{},dates:[]};
+    if(!byJahr[key].faecher[e.f])byJahr[key].faecher[e.f]=[];
+    byJahr[key].faecher[e.f].push(e.p);
+    byJahr[key].dates.push(e.d);
+  });
+
+  var jahre=Object.keys(byJahr).sort().reverse();
+
+  if(!jahre.length){
+    h+='<div class="card" style="text-align:center;color:var(--mu);padding:20px">Noch keine Einträge vorhanden.</div>';
+  } else {
+    jahre.forEach(function(key){
+      var item=byJahr[key];
+      var lastDate=item.dates.sort().reverse()[0];
+      var alleOk=true;
+      var anyData=false;
+
+      h+='<div class="card" style="margin-bottom:10px">';
+      h+='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">';
+      h+='<div><div style="font-weight:700;font-size:14px">'+item.j+'</div>';
+      h+='<div style="font-size:11px;color:var(--mu)">'+lastDate+'</div></div>';
+      h+='</div>';
+
+      h+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">';
+      ["rw","uf","vw","rs"].forEach(function(f){
+        var scores=item.faecher[f];
+        if(!scores||!scores.length){
+          h+='<div style="background:var(--su);border-radius:8px;padding:10px">';
+          h+='<div style="font-size:10px;color:'+FC[f]+';font-weight:700;margin-bottom:4px">'+FN[f].split(" ")[0]+'</div>';
+          h+='<div style="font-size:12px;color:var(--mu)">–</div>';
+          h+='</div>';
+          return;
+        }
+        anyData=true;
+        var avg=Math.round(scores.reduce(function(a,b){return a+b;},0)/scores.length);
+        var ok=avg>=50;
+        if(!ok)alleOk=false;
+        h+='<div style="background:var(--su);border-radius:8px;padding:10px;border:1px solid '+(ok?"rgba(52,192,104,.3)":"rgba(240,88,72,.3)")+'">';
+        h+='<div style="font-size:10px;color:'+FC[f]+';font-weight:700;margin-bottom:4px">'+FN[f].split(" ")[0]+'</div>';
+        h+='<div style="font-size:24px;font-weight:800;color:'+(ok?"var(--gr)":"var(--re)")+'">'+avg+'</div>';
+        h+='<div class="bar-wrap" style="margin-top:4px"><div class="bar" style="width:'+avg+'%;background:'+(ok?"var(--gr)":"var(--re)")+'"></div></div>';
+        h+='<div style="font-size:10px;margin-top:3px;color:'+(ok?"var(--gr)":"var(--re)")+'">'+(ok?"✅ Bestanden":"❌ Nicht best.")+'</div>';
+        h+='</div>';
+      });
+      h+='</div>';
+
+      if(anyData){
+        h+='<div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--br);font-size:12px;font-weight:700;color:'+(alleOk?"var(--gr)":"var(--re)")+'">';
+        h+=alleOk?"🎉 Alle Fächer bestanden!":"⚠ Noch nicht alle Fächer bestanden";
+        h+='</div>';
+      }
+      h+='</div>';
+    });
+  }
+
+  // Schwachstellen
+  var schwachCount={};
+  entries.forEach(function(e){(e.schwach||[]).forEach(function(s){schwachCount[s]=(schwachCount[s]||0)+1;});});
+  var topSchwach=Object.keys(schwachCount).sort(function(a,b){return schwachCount[b]-schwachCount[a];}).slice(0,8);
+  if(topSchwach.length){
+    var maxC=Math.max.apply(null,Object.values(schwachCount));
+    h+='<div style="font-weight:700;font-size:14px;margin:14px 0 10px">Häufige Schwachstellen</div>';
+    h+='<div class="card">';
+    h+='<div style="font-size:12px;color:var(--mu);margin-bottom:10px">Diese Themen zuerst wiederholen:</div>';
+    topSchwach.forEach(function(s){
+      var count=schwachCount[s];
+      h+='<div style="margin-bottom:8px"><div style="display:flex;justify-content:space-between;margin-bottom:3px"><span style="font-size:13px">'+s+'</span><span style="font-size:12px;color:var(--re);font-weight:700">'+count+'x</span></div>';
+      h+='<div class="bar-wrap"><div class="bar" style="width:'+Math.round(count/maxC*100)+'%;background:var(--re)"></div></div></div>';
+    });
+    h+='</div>';
+  }
+  c.innerHTML=h;
+}
+
+function renderSims(){
+  var list=document.getElementById("sim-list");
+  if(!sims.length){list.innerHTML='<div class="card" style="text-align:center;color:var(--mu);padding:20px">Noch keine Simulationen.</div>';return;}
+  var h="";
+  sims.slice().reverse().forEach(function(s){
+    var fok=["rw","uf","vw","rs"].filter(function(f){return parseInt(s[f])>=PASS;}).length;
+    h+='<div class="card" style="margin-bottom:8px">';
+    h+='<div style="display:flex;justify-content:space-between;margin-bottom:10px">';
+    h+='<div><div style="font-weight:700">'+s.j+'</div><div style="font-size:12px;color:var(--mu)">'+s.d+'</div></div>';
+    h+='<div style="font-weight:700;color:'+(fok===4?"var(--gr)":fok>=2?"var(--yl)":"var(--re)")+'">'+fok+'/4 bestanden</div>';
+    h+='</div>';
+    h+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">';
+    ["rw","uf","vw","rs"].forEach(function(f){
+      if(s[f]==="")return;
+      var p=parseInt(s[f]);
+      h+='<div style="background:var(--su);border-radius:7px;padding:8px;text-align:center">';
+      h+='<div style="font-size:10px;color:'+FC[f]+';font-weight:700">'+FN[f].split(" ")[0]+'</div>';
+      h+='<div style="font-size:20px;font-weight:800;color:'+(p>=50?"var(--gr)":"var(--re)")+'">'+p+'</div>';
+      h+='</div>';
+    });
+    h+='</div>';
+    if(s.schwach&&s.schwach.length){h+='<div style="margin-top:8px">';s.schwach.forEach(function(sw){h+='<span class="schwach-chip">'+sw+'</span>';});h+='</div>';}
+    if(s.n)h+='<div style="font-size:12px;color:var(--mu);margin-top:8px">'+s.n+'</div>';
+    h+='</div>';
+  });
+  list.innerHTML=h;
+}
+
+function saveSim(){
+  var d=document.getElementById("s-datum").value;
+  var j=document.getElementById("s-jahr").value.trim();
+  var rw=document.getElementById("s-rw").value;
+  var uf=document.getElementById("s-uf").value;
+  var vw=document.getElementById("s-vw").value;
+  var rs=document.getElementById("s-rs").value;
+  var sw=document.getElementById("s-schwach").value.trim();
+  var n=document.getElementById("s-notiz").value.trim();
+  if(!d||!j){alert("Bitte Datum und Prüfungsjahr eintragen!");return;}
+  var schwach=sw?sw.split(",").map(function(s){return s.trim();}).filter(Boolean):[];
+  sims.push({d:d,j:j,rw:rw?parseInt(rw):"",uf:uf?parseInt(uf):"",vw:vw?parseInt(vw):"",rs:rs?parseInt(rs):"",schwach:schwach,n:n});
+  ls("wfw_sims",sims);
+  var ts=Date.now();
+  if(rw)entries.push({id:ts,d:d,f:"rw",j:j+" [Sim]",p:parseInt(rw),schwach:schwach,n:n});
+  if(uf)entries.push({id:ts+1,d:d,f:"uf",j:j+" [Sim]",p:parseInt(uf),schwach:schwach,n:n});
+  if(vw)entries.push({id:ts+2,d:d,f:"vw",j:j+" [Sim]",p:parseInt(vw),schwach:schwach,n:n});
+  if(rs)entries.push({id:ts+3,d:d,f:"rs",j:j+" [Sim]",p:parseInt(rs),schwach:schwach,n:n});
+  ls("wfw_entries",entries);
+  ["s-rw","s-uf","s-vw","s-rs","s-notiz","s-jahr","s-schwach"].forEach(function(id){document.getElementById(id).value="";});
+  updateStreak();renderSims();
+  showToast("Simulation gespeichert!");
+}
+
+function exportD(){
+  var d={entries:entries,sims:sims,archiv:archiv,exportDate:new Date().toISOString()};
+  var b=new Blob([JSON.stringify(d,null,2)],{type:"application/json"});
+  var a=document.createElement("a");a.href=URL.createObjectURL(b);
+  a.download="wifiawi_backup_"+new Date().toISOString().slice(0,10)+".json";a.click();
+}
+function importD(e){
+  var file=e.target.files[0];if(!file)return;
+  var r=new FileReader();
+  r.onload=function(ev){
+    try{
+      var d=JSON.parse(ev.target.result);
+      if(d.entries){entries=d.entries;ls("wfw_entries",entries);}
+      if(d.sims){sims=d.sims;ls("wfw_sims",sims);}
+      if(d.archiv){archiv=d.archiv;ls("wfw_archiv",archiv);}
+      updateStreak();alert("Import erfolgreich!");
+    }catch(err){alert("Fehler beim Import: "+err.message);}
+  };
+  r.readAsText(file);
+}
+function resetD(){
+  if(!confirm("Wirklich ALLE Daten zurücksetzen? Das kann nicht rückgängig gemacht werden!"))return;
+  entries=[];sims=[];archiv=[];
+  ls("wfw_entries",entries);ls("wfw_sims",sims);ls("wfw_archiv",archiv);
+  updateStreak();alert("Zurückgesetzt.");
+}
+
+updateStreak();
+</script>
+</body>
+</html>
